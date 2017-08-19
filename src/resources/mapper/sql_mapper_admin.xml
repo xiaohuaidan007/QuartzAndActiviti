@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="base">
+
+	<!-- 插入客户信息  -->
+	<insert id="insertClientInfo" parameterType="ClientInfoDTO">
+		<![CDATA[
+			INSERT INTO CLIENT_INFO
+			(
+				CREATE_DATE,
+				NAME,
+				AGE,
+				EYE,
+				PHONE,
+				ORDER_DATE,
+				COME_DATE,
+				INFO_TOOL,
+				STORE_NAME,
+				AMOUNT,
+				TRY_COUNT,
+				SERVER
+			)
+			VALUES
+			(
+				#{create_date},
+				#{name},
+				#{age},
+				#{eye},
+				#{phone},
+				#{order_date},
+				#{come_date},
+				#{info_tool},
+				#{store_name},
+				#{amount},
+				#{try_count},
+				#{server}
+			)
+		]]>
+	</insert>
+	
+	<!-- 清空客户信息 -->
+	<delete id="deleteClientInfo">
+		<![CDATA[
+			DELETE FROM CLIENT_INFO
+		]]>
+	</delete>
+	
+	<!-- 统计店铺信息 -->
+	<select id="queryStoreInfo" resultType="StoreInfoDTO">
+		<![CDATA[
+			SELECT 
+				STORE_NAME,
+				COUNT(order_date) AS order_count,
+				COUNT(come_date) AS come_count,
+				COUNT(if(try_count = 0,null,true)) AS try_count,
+				COUNT(if(amount = 0,null,true)) AS success_count
+			FROM CLIENT_INFO
+			GROUP BY store_name
+			ORDER BY store_name
+		]]>
+	</select>
+	
+	<!-- 统计渠道信息 -->
+	<select id="queryToolInfo" resultType="ToolInfoDTO">
+		<![CDATA[
+			select 
+				*,
+				order_count/ask_count as order_point,
+				come_count/order_count as come_point,
+				try_count/come_count as try_point,
+				success_count/try_count as success_point
+			from
+				(SELECT 
+					INFO_TOOL as tool_name,
+					COUNT(0) AS ask_count,
+					COUNT(order_date) AS order_count,
+					COUNT(come_date) AS come_count,
+					COUNT(if(try_count = 0,null,true)) AS try_count,
+					COUNT(if(amount = 0,null,true)) AS success_count,
+					SUM(amount) AS total_amount
+				FROM CLIENT_INFO
+				GROUP BY info_tool
+				ORDER BY info_tool) new
+		]]>
+	</select>
+	
+	<!-- 统计客服信息 -->
+	<select id="queryServerInfo" resultType="ServerInfoDTO">
+		<![CDATA[
+			select 
+				*,
+				order_count/ask_count as order_point,
+				come_count/order_count as come_point,
+				try_count/come_count as try_point,
+				success_count/try_count as success_point
+			from
+				(SELECT 
+					server as server_name,
+					COUNT(0) AS ask_count,
+					COUNT(order_date) AS order_count,
+					COUNT(come_date) AS come_count,
+					COUNT(if(try_count = 0,null,true)) AS try_count,
+					COUNT(if(amount = 0,null,true)) AS success_count,
+					SUM(amount) AS total_amount
+				FROM CLIENT_INFO
+				GROUP BY server
+				ORDER BY server) new
+		]]>
+	</select>
+</mapper>
