@@ -2,7 +2,6 @@ package com.pb.modult.quartz.listener;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 import java.util.List;
 
 import org.quartz.JobExecutionContext;

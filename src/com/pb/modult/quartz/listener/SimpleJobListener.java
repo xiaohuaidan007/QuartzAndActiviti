@@ -30,6 +30,7 @@ public class SimpleJobListener extends JobListenerSupport {
 	 * 任务依赖，每一个job触发时，需要检查所依赖的任务是否完成，即查询最新一次任务是否完成
 	 */
 	public void jobExecutionVetoed(JobExecutionContext context) {
+		
 	};
 
 	/**

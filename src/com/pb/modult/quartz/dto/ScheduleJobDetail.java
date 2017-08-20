@@ -26,6 +26,8 @@ public class ScheduleJobDetail extends BaseDTO{
 	private String description;
 	//任务依赖
 	private String dependency;
+	/**启动参数*/
+	private String startParam;
 	
 	public String getJobId() {
 		return jobId;
@@ -86,6 +88,12 @@ public class ScheduleJobDetail extends BaseDTO{
 	}
 	public void setDependency(String dependency) {
 		this.dependency = dependency;
+	}
+	public String getStartParam() {
+		return startParam;
+	}
+	public void setStartParam(String startParam) {
+		this.startParam = startParam;
 	}
 	
 }

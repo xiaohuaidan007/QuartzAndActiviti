@@ -1,14 +1,14 @@
 package com.pb.modult.quartz.biz.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.quartz.CronScheduleBuilder;
@@ -34,6 +34,7 @@ import com.pb.base.log.LoggerHelp;
 import com.pb.modult.quartz.biz.bo.TaskScheduleBo;
 import com.pb.modult.quartz.dto.ScheduleJob;
 import com.pb.modult.quartz.dto.ScheduleJobDetail;
+import com.pb.modult.quartz.dto.ScheduleTrigger;
 import com.pb.modult.quartz.job.QuartzJobFactory;
 import com.pb.modult.quartz.listener.SimpleJobListener;
 import com.pb.modult.quartz.listener.SimpleTriggerListener;
@@ -172,47 +173,6 @@ public class TaskScheduleService {
 			e.printStackTrace();
 		}
 	}
-
-	/**
-	 * 终止定时任务
-	 */
-	/*@PreDestroy
-	public void destoryQuartzTasks() {
-		try {
-			if (!scheduler.isShutdown()) {
-				scheduler.shutdown();
-			}
-		} catch (SchedulerException e) {
-			e.printStackTrace();
-		}
-	}*/
-
-	/**
-	 * 添加定时作业
-	 * 
-	 * @param scheduleJob
-	 */
-/*	public void addJob(ScheduleJob scheduleJob) {
-
-	}*/
-
-	/**
-	 * 修改指定任务的触发时间
-	 * 
-	 * @param scheduleJob
-	 */
-/*	public void modifyJobTime(ScheduleJob scheduleJob) {
-
-	}*/
-
-	/**
-	 * 移除一个任务
-	 * 
-	 * @param scheduleJob
-	 */
-/*	public void deleteJob(ScheduleJob scheduleJob) {
-
-	}*/
 
 	/**
 	 * 立刻执行该job
@@ -401,6 +361,7 @@ public class TaskScheduleService {
 	 * 
 	 * @throws SchedulerException
 	 */
+	@SuppressWarnings("rawtypes")
 	public List<ScheduleJob> getAllScheduleJobs() throws SchedulerException {
 		// 获取调度器内所有任务组名
 		List<String> groupNames = scheduler.getJobGroupNames();
@@ -509,6 +470,7 @@ public class TaskScheduleService {
 	 * @param pageSize
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public PageInfo queryHisTaskByCondition(String jobId,String jobName,String taskStatus,Integer pageNo,Integer pageSize){
 		return taskScheduleBo.queryHisTaskByCondition(jobId, jobName, taskStatus,pageNo, pageSize);
 	}

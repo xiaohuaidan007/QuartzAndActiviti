@@ -16,13 +16,9 @@ public class AdminService {
 	@Autowired
 	private AdminBO adminBO;
 	
-	Logger logger = Logger.getLogger(AdminService.class);
-	
-	org.slf4j.Logger logger2 = org.slf4j.LoggerFactory.getLogger("InfoFile");
-	
 	public void login(){
-		logger.info("info日志");
-		logger.error("error日志");
-		logger2.debug("debug日志，主键{}", "主键值");
+		System.out.println("开始执行bo");
+		adminBO.init();
+		System.out.println("bo执行结束");
 	}
 }

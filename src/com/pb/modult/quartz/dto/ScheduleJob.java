@@ -1,6 +1,8 @@
 package com.pb.modult.quartz.dto;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.pb.base.dto.BaseDTO;
 
@@ -41,6 +43,12 @@ public class ScheduleJob extends BaseDTO{
 	private String beanName;
 	/**定时任务依赖*/
 	private String dependency;
+	/**启动参数*/
+	private String startParam;
+	
+	//启动参数
+	private Map<String, String> startParamMap = new HashMap<String, String>();
+//	private String startParamString;
 
 	public String getJobId() {
 		return jobId;
@@ -152,6 +160,22 @@ public class ScheduleJob extends BaseDTO{
 
 	public void setDependency(String dependency) {
 		this.dependency = dependency;
+	}
+
+	public Map<String, String> getStartParamMap() {
+		return startParamMap;
+	}
+
+	public void addStartParam(String key, String value) {
+		this.startParamMap.put(key, value);
+	}
+
+	public String getStartParam() {
+		return startParam;
+	}
+
+	public void setStartParam(String startParam) {
+		this.startParam = startParam;
 	}
 	
 }

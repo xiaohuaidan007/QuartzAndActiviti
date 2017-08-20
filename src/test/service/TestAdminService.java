@@ -14,6 +14,7 @@ public class TestAdminService extends BaseTest{
 	
 	@Test
 	public void testLogin(){
+		System.out.println("开始输出");
 		adminService.login();
 	}
 

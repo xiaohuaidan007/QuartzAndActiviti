@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- "D:\log\mybatis-3-mapper.dtd"> -->
+<mapper namespace="basedb">
+	<select id="selectApplyScoreById" parameterType="java.lang.String"
+		resultType="java.util.HashMap">
+		select * from rm_intf_apply_score_req t where t.ID_APPLY_SCORE_REQ = #{id}
+	</select>
+
+	<select id="queryQuartzJobGroup" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select t.job_group from qz_job_details t where t.job_name = #{value}
+	</select>
+	
+	<select id="getScheduleJobDetails" parameterType="java.lang.String"
+		resultType="com.pb.modult.quartz.dto.ScheduleJobDetail">
+		select t1.job_name as jobName,
+		       t1.job_group as jobGroup,
+		       t2.bean_name as beanName,
+		       t2.method_name as methodName,
+		       t2.run_ip as runIp,
+		       t2.START_PARAM as startParam
+		from qz_job_details t1, qz_job_details_ext t2
+		where t1.job_name = t2.job_name
+		and t1.job_group = t2.job_group
+	</select>
+	
+	<select id="getTriggerByJK" parameterType="java.util.HashMap"
+		resultType="com.pb.modult.quartz.dto.ScheduleTrigger">
+		 select t1.trigger_name as triggerName,
+                t1.trigger_group as triggerGroup,
+                t2.cron_expression as cronExpression
+           from qz_triggers t1,qz_cron_triggers t2
+          where t1.trigger_name = t2.trigger_name
+            and t1.trigger_group = t2.trigger_group
+            and t1.job_name = #{jobName}
+            and t1.job_group = #{jobGroup}
+	</select>
+	
+    <!-- 添加任务执行明细扩展 -->
+	<insert id="addJobDetailExt"
+		parameterType="com.pb.modult.quartz.dto.ScheduleJobDetail">
+		insert into qz_job_details_ext
+		(JOB_NAME, 
+		 JOB_GROUP, 
+		 BEAN_NAME, 
+		 RUN_IP,
+		 DESCRIPTION,
+		 JOB_ID,
+		 START_PARAM)
+		values
+		(#{jobName},
+		 #{jobGroup},
+		 #{beanName},
+		 '127.0.0.1',
+		 #{description},
+		 #{jobId},
+		 #{startParam,jdbcType=VARCHAR})
+	</insert>
+
+     <!-- 添加任务依赖 -->
+	<insert id="addJobDependency"
+		parameterType="com.pb.modult.quartz.dto.ScheduleJobDetail">
+		 insert into QZ_JOB_DEPENDENCY
+  			 (job_id, DEPEND_JOB_ID)
+ 		values
+   			 (#{jobId}, #{dependency})
+	</insert>
+	
+	<!-- 通过triggerName与triggerGroup查询定时任务信息 -->
+	<select id="getScheduleJobByTK" parameterType="java.util.HashMap"
+		resultType="com.pb.modult.quartz.dto.ScheduleJob">
+        select 	t1.job_name as jobName,
+               	t1.job_group as jobGroup,
+             	t1.bean_name as beanName,
+             	t1.job_id as jobId,
+                t1.description as description,
+            	t2.trigger_name as triggerName,
+            	t2.trigger_group as triggerGroup,
+             	t2.cron_expression as cronExpression,
+             	t4.depend_job_id as dependency,
+             	t1.START_PARAM as startParam
+        from 	qz_job_details_ext t1,
+             	qz_cron_triggers   t2,
+             	qz_triggers        t3,
+                qz_job_dependency t4
+      	 where t1.job_name = t3.job_name
+         and t1.job_group = t3.job_group
+         and t1.job_id = t4.job_id(+)
+         and t2.trigger_name = t3.trigger_name
+         and t2.trigger_group = t3.trigger_group
+         and t3.trigger_name = #{triggerName}
+         and t3.trigger_group = #{triggerGroup}
+	</select>
+	
+	<select id="getJobDependencyById" parameterType="java.lang.String" resultType="java.lang.String">
+	     select t.DEPEND_JOB_ID from QZ_JOB_DEPENDENCY t where t.JOB_ID = #{value}
+	</select>
+	
+	<!-- 更新qz_job_details_ext表中的数据 -->
+	<update id="updateJobDetailsExt"
+		parameterType="com.pb.modult.quartz.dto.ScheduleJob">
+		update qz_job_details_ext t
+		      set t.bean_name = #{beanName},
+		           t.JOB_ID = #{jobId},
+		           t.DESCRIPTION = #{description},
+		           t.START_PARAM = #{startParam}
+		 where t.job_name = #{jobName}
+		     and t.job_group = #{jobGroup}
+	</update>
+	
+	<!-- 更新qz_job_dependency表中的数据 -->
+	<update id="updateJobDependency"
+		parameterType="com.pb.modult.quartz.dto.ScheduleJob">
+		update QZ_JOB_DEPENDENCY t 
+		      set t.DEPEND_JOB_ID = #{dependency} 
+		 where t.JOB_ID = #{jobId}
+	</update>
+	
+	<!-- 通过triggerName与triggerGroup查询定时任务信息 -->
+	<select id="getJobDetailExt" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+        select t.JOB_ID, 
+                 t.DESCRIPTION, 
+                 t.BEAN_NAME,
+                 t.START_PARAM
+          from QZ_JOB_DETAILS_EXT t
+        where t.JOB_NAME = #{jobName}
+            and t.JOB_GROUP = #{jobGroup}
+	</select>
+
+    <!-- 通过triggerName与triggerGroup查询定时任务信息 -->
+	<select id="getJobDependency" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select t.depend_job_id from qz_job_dependency t where t.job_id = #{value}
+	</select>
+
+	<select id="getJobLogsUnCompleted" parameterType="java.lang.String"
+		resultType="com.pb.modult.quartz.dto.ScheduleJobLog">
+		select * from (select t.JOB_ID as jobId,
+	        t.JOB_NAME  as jobName,
+	        t.DATE_TASK_START as dateTaskStart,
+	        t.DATE_TASK_END as dateTaskEnd,
+	        t.TASK_STATUS as taskStatus,
+	        t.RUN_ERR_MSG as runErrMsg,
+	        t.RUN_IP as runIp,
+	        t.DATE_CREATED as dateCreated,
+	        t.DATE_UPDATED as dateUpdated
+	      from qz_job_log t
+	      where t.TASK_STATUS in ('R', 'E')
+	          and t.JOB_ID = #{value}
+	          order by datecreated desc) where rownum = 1
+	</select>
+	
+    <!-- 初始化定时任务日志信息 -->
+	<insert id="insertJobLog" parameterType="com.pb.modult.quartz.dto.ScheduleJobLog">
+		insert into QZ_JOB_LOG
+			(ID_JOB_LOG,
+			JOB_ID,
+			JOB_NAME,
+			DATE_TASK_START,
+			DATE_TASK_END,
+			TASK_STATUS,
+			RUN_ERR_MSG,
+			RUN_IP,
+			DATE_CREATED,
+			DATE_UPDATED)
+		values
+			(#{idJobLog},
+			#{jobId},
+			#{jobName},
+			sysdate,
+	   	    null,
+			#{taskStatus},
+			#{runErrMsg},
+			#{runIp},
+			sysdate,
+		    sysdate)
+	</insert>
+	
+	<!-- 获取定时任务日志主键 -->
+	<select id="getJobLogPrimaryKey" resultType="java.lang.String">
+	       select sys_guid() from dual
+	</select>
+
+    <!-- 更新定时任务日志信息 -->
+	<update id="updateJobLog"
+		parameterType="com.pb.modult.quartz.dto.ScheduleJobLog">
+		update QZ_JOB_LOG t
+			set t.TASK_STATUS = #{taskStatus},
+			     t.RUN_ERR_MSG = #{runErrMsg},
+				 t.DATE_TASK_END = sysdate,
+				 t.DATE_UPDATED = sysdate
+		where t.id_job_log = #{idJobLog}
+	</update>
+
+	<!-- 查询定时任务日志信息 -->
+	<select id="queryJobLogByCondition" parameterType="java.util.HashMap"
+		resultType="com.pb.modult.quartz.dto.ScheduleJobLog">
+		select t.ID_JOB_LOG as idJobLog,
+				t.JOB_ID as jobId,
+				t.JOB_NAME as jobName,
+				t.DATE_TASK_START as dateTaskStart,
+				t.DATE_TASK_END as dateTaskEnd,
+				t.TASK_STATUS as taskStatus,
+				t.RUN_ERR_MSG as runErrMsg,
+				t.RUN_IP as runIp,
+				t.DATE_CREATED as dateCreated,
+				t.DATE_UPDATED as dateUpdated
+		from QZ_JOB_LOG t
+		where
+		1=1
+		<if test="jobId != null and jobId != ''">
+			<![CDATA[
+				AND 
+					JOB_ID = #{jobId}	
+			]]>
+		</if>
+		<if test="jobName != null and jobName != ''">
+			<![CDATA[
+				AND 
+					JOB_NAME = #{jobName}
+			]]>
+		</if>
+		<if test="taskStatus != null and taskStatus != ''">
+			<![CDATA[
+				AND 
+					TASK_STATUS = #{taskStatus}
+			]]>
+		</if>
+		and t.date_created > sysdate - 3
+		order by t.date_created desc
+	</select>
+	<!-- 通过主键删除任务日志 -->
+	<delete id="deleteJobLogByPK" parameterType="java.lang.String">
+	      delete from QZ_JOB_LOG t where t.ID_JOB_LOG = #{idJobLog}
+	</delete>
+	
+    <!-- 通过TriggerKey查询JobKey -->
+	<select id="getJobKeyByTK" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select t.job_name, 
+		         t.job_group
+		  from qz_triggers t
+		where t.trigger_name = #{triggerName}
+		   and t.trigger_group = #{triggerGroup}
+	</select>
+
+     <!-- 通过JobKey删除Job扩展信息-->
+	<delete id="deleteJobDetailExtByJK" parameterType="java.util.HashMap">
+		delete from QZ_JOB_DETAILS_EXT t
+		        where t.JOB_NAME = #{jobName}
+		           and t.JOB_GROUP = #{jobGroup}
+	</delete>
+	
+	<!-- 通过JobId删除任务依赖信息-->
+	<delete id="deleteJobDependencyByJobId" parameterType="java.lang.String">
+	      delete from QZ_JOB_DEPENDENCY t where t.JOB_ID = #{jobId}
+	</delete>
+	
+</mapper>
